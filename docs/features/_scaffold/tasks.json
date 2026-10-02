@@ -1,0 +1,58 @@
+{
+  "slug": "_scaffold",
+  "tasks": [
+    {
+      "id": "S1",
+      "title": "Create monorepo layout, workspace config, and API entry point",
+      "layer": "scaffold",
+      "deps": [],
+      "acs": [],
+      "dod": "pnpm install succeeds; apps/api builds and boots a health route; apps/web and apps/mobile packages exist with placeholder entry",
+      "files_hint": [
+        "package.json",
+        "pnpm-workspace.yaml",
+        "turbo.json",
+        "apps/api/",
+        "apps/web/",
+        "apps/mobile/",
+        "packages/shared/"
+      ]
+    },
+    {
+      "id": "S2",
+      "title": "Wire Vitest, shared smoke test, and root test scripts",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "pnpm test runs green; smoke test asserts API health and empty suite passes",
+      "files_hint": ["vitest.config.ts", "apps/api/src/**/*.test.ts", "scripts/smoke.test.ts"]
+    },
+    {
+      "id": "S3",
+      "title": "Set up Prisma schema, migration tool, and initial migration",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "prisma migrate deploy and reset succeed against local PostgreSQL",
+      "files_hint": ["apps/api/prisma/schema.prisma", "apps/api/prisma/migrations/"]
+    },
+    {
+      "id": "S4",
+      "title": "Add CI workflow for build, test, and lint",
+      "layer": "scaffold",
+      "deps": ["S2", "S3"],
+      "acs": [],
+      "dod": "GitHub Actions workflow validates pnpm build, test, and lint commands match architecture-map frontmatter",
+      "files_hint": [".github/workflows/ci.yml"]
+    },
+    {
+      "id": "S5",
+      "title": "Write CLAUDE.md from foundation conventions",
+      "layer": "scaffold",
+      "deps": ["S1"],
+      "acs": [],
+      "dod": "Root CLAUDE.md documents monorepo layout, hexagonal modules, Prisma, ULIDs, and test commands",
+      "files_hint": ["CLAUDE.md"]
+    }
+  ]
+}
