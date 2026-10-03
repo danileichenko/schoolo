@@ -179,7 +179,220 @@ sequenceDiagram
     Note over A,S: Postcondition on success: School Admin can open school administration for the new tenant
 ```
 
-<!-- remaining flows: Invite teacher, Reissue invite, Accept invite, Staff sign in, Revoke teacher access, Cross-school boundary -->
+### Invite teacher
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as SchoolAdmin
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+    participant X as external-system
+
+    Note over A,S: Precondition: School Admin is signed in for their school
+    A->>UI: Invite Teacher by work email
+    UI->>S: Invite Teacher
+    alt email already active or pending at this school
+        S->>D: Lookup staff or invite by work email
+        D-->>S: active or pending found
+        S-->>UI: Already invited or active on roster
+        UI-->>A: Explain duplicate
+    else invite succeeds
+        S->>D: Lookup staff or invite by work email
+        D-->>S: none
+        S->>D: Write pending Teacher invite
+        Note over S,D: persists Teacher invite pending
+        D-->>S: ack
+        S->>X: Enqueue invite message
+        X-->>S: accepted
+        S-->>UI: Pending on staff roster
+        UI-->>A: See awaiting acceptance
+    end
+    Note over A,S: Postcondition on success: pending invite visible on staff roster
+```
+
+### Reissue invite
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as SchoolAdmin
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+    participant X as external-system
+
+    Note over A,S: Precondition: pending or expired invite exists for a work email at this school
+    A->>UI: Reissue invite for work email
+    UI->>S: Reissue invite
+    S->>D: Lookup prior invite for email
+    D-->>S: pending or expired found
+    S->>D: Invalidate prior invite
+    Note over S,D: persists prior invite as invalid
+    D-->>S: ack
+    S->>D: Write new pending invite
+    Note over S,D: persists Teacher invite pending
+    D-->>S: ack
+    S->>X: Enqueue invite message
+    X-->>S: accepted
+    S-->>UI: New pending state on roster
+    UI-->>A: See new awaiting acceptance
+    Note over A,S: Postcondition: old invite link dead, new pending invite on roster
+```
+
+### Accept invite
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor T as Teacher
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+
+    Note over T,S: Precondition: Teacher opens a valid invite for a school
+    T->>UI: Complete invite with password
+    UI->>S: Accept invite
+    alt invite expired or already used
+        S->>D: Lookup invite
+        D-->>S: expired or used
+        S-->>UI: Request a new invite from School Admin
+        UI-->>T: Explain invite is invalid
+    else work email already active staff at another school
+        S->>D: Lookup invite and global staff by email
+        D-->>S: invite ok, email tied elsewhere
+        S-->>UI: Email already tied to another school
+        UI-->>T: Explain cannot join this school
+    else accept succeeds
+        S->>D: Lookup invite
+        D-->>S: pending and not expired
+        S->>D: Activate Teacher and invalidate invite
+        Note over S,D: persists Teacher active and invite used
+        D-->>S: ack
+        S->>D: Write session
+        Note over S,D: persists Session
+        D-->>S: ack
+        S-->>UI: Session established
+        UI-->>T: Open teacher workspace
+    end
+    Note over T,S: Postcondition on success: Teacher active for one school only
+```
+
+### Staff sign in
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor U as Staff
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+
+    Note over U,S: Precondition: School Admin or Teacher has an active account
+    U->>UI: Submit work email and password
+    UI->>S: Sign in
+    alt account locked after failed attempts
+        S->>D: Lookup staff by email
+        D-->>S: locked until cooldown ends
+        S-->>UI: Account temporarily locked
+        UI-->>U: Plain lock message
+    else credentials do not match active staff
+        S->>D: Lookup staff by email
+        D-->>S: missing or password mismatch
+        S->>D: Record failed attempt
+        Note over S,D: persists failed sign-in counter
+        D-->>S: ack
+        S-->>UI: Access denied without revealing other schools
+        UI-->>U: Generic denial
+    else sign in succeeds
+        S->>D: Lookup staff by email
+        D-->>S: active School Admin or Teacher
+        S->>D: Write session
+        Note over S,D: persists Session
+        D-->>S: ack
+        S-->>UI: Session established with role
+        alt School Admin
+            UI-->>U: Open school administration
+        else Teacher
+            UI-->>U: Open teacher workspace
+        end
+    end
+    Note over U,S: Postcondition on success: staff in role-appropriate workspace for their school only
+```
+
+### Revoke teacher access
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as SchoolAdmin
+    actor T as Teacher
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+
+    Note over A,S: Precondition: School Admin signed in; Teacher is active at the school
+    A->>UI: Revoke Teacher access
+    UI->>S: Revoke Teacher
+    alt caller is Teacher not School Admin
+        S-->>UI: Only School Admin may manage staff
+        UI-->>A: Deny action
+    else revoke succeeds
+        S->>D: Mark Teacher inactive and invalidate sessions
+        Note over S,D: persists Teacher inactive and Session invalid
+        D-->>S: ack
+        S-->>UI: Teacher shown inactive on roster
+        UI-->>A: See inactive on staff roster
+        Note over T,S: Teacher next request with old session is denied
+    end
+    Note over A,S: Postcondition: Teacher inactive; cannot use teacher workspace
+```
+
+### Cross-school boundary
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor A as Staff
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+
+    Note over A,S: Precondition: Staff signed in for school A
+    A->>UI: Attempt to view or change school B administration
+    UI->>S: Request school B admin data
+    S->>D: Resolve caller school membership
+    D-->>S: school A
+    S-->>UI: Access denied with plain-language message
+    UI-->>A: No school B data shown
+    Note over A,S: Postcondition: no foreign tenant data leaked; denial logged
+```
+
+### AC → flow coverage
+
+| AC | Where shown |
+|---|---|
+| AC-01 | Register school — success |
+| AC-02 | Register school — validation alt |
+| AC-02b | Register school — name taken alt |
+| AC-03 | Invite teacher — success |
+| AC-04 | Invite teacher — duplicate alt |
+| AC-05 | Accept invite — success |
+| AC-06 | Accept invite — expired/used alt |
+| AC-06b | Accept invite — email elsewhere alt |
+| AC-07 | Staff sign in — success |
+| AC-08 | Staff sign in — bad credentials alt |
+| AC-09 | Revoke teacher access — success |
+| AC-10 | Revoke teacher access — Teacher caller alt (invite denial uses same role check on Invite teacher) |
+| AC-11 | Cross-school boundary |
+| AC-12 | Accept invite — email elsewhere alt |
+| AC-13 | Reissue invite |
+
+### Sequences flags
+
+- Design seed diagrams replaced by this sequences pass (generic ui/service/data-store participants).
+- Immediate session invalidation on revoke is intentional hardening vs AC-09 wording (see sad.md §1 Decision overrides).
 
 ## 7. Deployment view
 
