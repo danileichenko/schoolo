@@ -8,10 +8,28 @@ datasource db {
 }
 
 model School {
-  id        String   @id
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String        @id
+  name         String
+  createdAt    DateTime      @default(now()) @map("created_at")
+  staffMembers StaffMember[]
 
   @@unique([name])
   @@map("schools")
+}
+
+model StaffMember {
+  id                String   @id
+  schoolId          String   @map("school_id")
+  workEmail         String   @map("work_email")
+  passwordHash      String   @map("password_hash")
+  role              String
+  status            String
+  failedSignInCount Int      @default(0) @map("failed_sign_in_count")
+  lockedUntil       DateTime? @map("locked_until")
+  createdAt         DateTime @default(now()) @map("created_at")
+  school            School   @relation(fields: [schoolId], references: [id])
+
+  @@unique([workEmail])
+  @@index([schoolId])
+  @@map("staff_members")
 }

@@ -9,7 +9,7 @@ files_hint: ["docs/features/school-auth/migrations/02_create_staff_members.up.sq
 owner: "Backend Lead"
 estimate: "S"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T2 — Promote staff_members table migration

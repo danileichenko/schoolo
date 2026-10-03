@@ -20,3 +20,19 @@ describe("school-auth schema — schools.name unique (AC-02b)", () => {
     expect(migrationSql).toContain("CREATE UNIQUE INDEX");
   });
 });
+
+describe("school-auth schema — staff_members (AC-01)", () => {
+  it("declares StaffMember with unique workEmail", () => {
+    const schema = readFileSync(join(prismaDir, "schema.prisma"), "utf8");
+    expect(schema).toMatch(/model StaffMember \{[\s\S]*?workEmail[\s\S]*?@@unique\(\[workEmail\]\)/);
+  });
+
+  it("has promoted staff_members migration", () => {
+    const sql = readFileSync(
+      join(prismaDir, "migrations/20261003160100_create_staff_members/migration.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS staff_members");
+    expect(sql).toContain("staff_members_work_email_key");
+  });
+});
