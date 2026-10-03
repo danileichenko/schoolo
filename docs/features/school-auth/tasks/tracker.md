@@ -13,7 +13,7 @@
 | T6 | Implement staff, invite, and session domain rules | domain | Backend Lead | M | — | done |
 | T7 | Wire schools Prisma repository adapter | infra | Backend Lead | S | T1, T5 | done |
 | T8 | Wire users Prisma repos and EmailPort adapter | infra | Backend Lead | M | T2, T3, T4, T6 | done |
-| T9 | Implement RegisterSchool use case | app | Backend Lead | M | T7, T8 | todo |
+| T9 | Implement RegisterSchool use case | app | Backend Lead | M | T7, T8 | done |
 | T10 | Implement InviteTeacher and ReissueInvite use cases | app | Backend Lead | M | T8 | todo |
 | T11 | Implement AcceptInvite use case | app | Backend Lead | M | T8 | todo |
 | T12 | Implement SignIn use case with lockout | app | Backend Lead | M | T8 | todo |

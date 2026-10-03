@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/schools/app/", "apps/api/src/modules/users/ap
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T9 — Implement RegisterSchool use case
