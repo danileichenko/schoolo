@@ -20,7 +20,7 @@ A mandatory school runs its official journal in schoolo: teachers enter schedule
 | # | Step | Source | Size | Status |
 |---:|---|---|:---:|---|
 | 1 | Materialize project skeleton | `architecture-map.md` — Stack | S | shipped |
-| 2 | School auth, tenancy, and roster | `idea-brief.md` — `## 7. Recommendation` | M | idea |
+| 2 | School auth, tenancy, and roster | `idea-brief.md` — `## 7. Recommendation` | M | spec'd |
 | 3 | Schedule end-to-end (teacher web + student mobile) | `idea-brief.md` — `## 1. Raw idea` | M | idea |
 | 4 | Homework end-to-end (teacher web + student mobile) | `idea-brief.md` — `## 2. Problem` | M | idea |
 | 5 | Grades end-to-end (teacher web + student mobile) | `idea-brief.md` — `## 1. Raw idea` | M | idea |
