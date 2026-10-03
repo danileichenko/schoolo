@@ -5,7 +5,7 @@
 
 | # | Task | Layer | Owner | Estimate | Blocked by | Status |
 |---|---|---|---|---|---|---|
-| T1 | Promote unique schools.name migration | migration | Backend Lead | S | — | todo |
+| T1 | Promote unique schools.name migration | migration | Backend Lead | S | — | done |
 | T2 | Promote staff_members table migration | migration | Backend Lead | S | T1 | todo |
 | T3 | Promote teacher_invites table migration | migration | Backend Lead | S | T1 | todo |
 | T4 | Promote sessions table migration | migration | Backend Lead | S | T2 | todo |

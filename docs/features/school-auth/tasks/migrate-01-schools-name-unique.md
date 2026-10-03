@@ -9,7 +9,7 @@ files_hint: ["docs/features/school-auth/migrations/01_unique_schools_name.up.sql
 owner: "Backend Lead"
 estimate: "S"
 context_budget: "S"
-status: "todo"
+status: "done"
 ---
 
 # T1 — Promote unique schools.name migration
