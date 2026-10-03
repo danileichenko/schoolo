@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/users/app/"]
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "S"
-status: "todo"
+status: "done"
 ---
 
 # T12 — Implement SignIn use case with lockout

@@ -73,12 +73,12 @@ export function recordFailedSignIn(
   return { failedSignInCount, lockedUntil: state.lockedUntil };
 }
 
-export function revokeTeacherAccess(input: {
+export function revokeTeacherAccess<T extends { revokedAt: Date | null }>(input: {
   role: StaffRole;
   status: StaffStatus;
-  sessions: { id: string; revokedAt: Date | null }[];
+  sessions: T[];
   now: Date;
-}): { status: StaffStatus; sessions: { id: string; revokedAt: Date | null }[] } {
+}): { status: StaffStatus; sessions: T[] } {
   void input.role;
   void input.status;
   return {

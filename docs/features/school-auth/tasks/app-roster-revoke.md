@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/users/app/", "apps/api/src/modules/schools/ap
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T13 — Implement roster, revoke, and tenancy checks

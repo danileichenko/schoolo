@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/users/app/"]
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T11 — Implement AcceptInvite use case
