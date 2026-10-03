@@ -9,7 +9,7 @@ files_hint: ["apps/web/app/(authenticated)/school-admin/", "apps/web/components/
 owner: "Frontend Lead"
 estimate: "L"
 context_budget: "L"   # justified: SCR-04 multi-action roster + invite/revoke/reissue states in one screen
-status: "todo"
+status: "done"
 ---
 
 # T18 — Build school administration staff roster screen

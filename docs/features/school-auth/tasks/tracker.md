@@ -21,8 +21,8 @@
 | T14 | Expose register, sign-in, and accept-invite HTTP ports | ports | Backend Lead | M | T9, T11, T12 | done |
 | T15 | Expose invite, reissue, roster, and revoke HTTP ports | ports | Backend Lead | M | T10, T13 | done |
 | T16 | Compose DI, session cookie middleware, and route registration | wiring | Backend Lead | M | T14, T15 | done |
-| T17 | Build public register, sign-in, and accept-invite screens | ui | Frontend Lead | L | T16 | todo |
-| T18 | Build school administration staff roster screen | ui | Frontend Lead | L | T16 | todo |
-| T19 | Build teacher workspace shell placeholder | ui | Frontend Lead | S | T16 | todo |
+| T17 | Build public register, sign-in, and accept-invite screens | ui | Frontend Lead | L | T16 | done |
+| T18 | Build school administration staff roster screen | ui | Frontend Lead | L | T16 | done |
+| T19 | Build teacher workspace shell placeholder | ui | Frontend Lead | S | T16 | done |
 
 **Total:** 19 tasks, ~12–14 person-days (size M, dual surface).

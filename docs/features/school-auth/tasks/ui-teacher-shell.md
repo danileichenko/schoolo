@@ -9,7 +9,7 @@ files_hint: ["apps/web/app/(authenticated)/teacher/"]
 owner: "Frontend Lead"
 estimate: "S"
 context_budget: "S"
-status: "todo"
+status: "done"
 ---
 
 # T19 — Build teacher workspace shell placeholder

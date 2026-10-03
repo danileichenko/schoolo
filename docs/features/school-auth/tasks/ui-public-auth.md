@@ -9,7 +9,7 @@ files_hint: ["apps/web/app/(public)/", "apps/web/components/"]
 owner: "Frontend Lead"
 estimate: "L"
 context_budget: "L"   # justified: three SCR manifests + OpenAPI error mapping in one public auth surface
-status: "todo"
+status: "done"
 ---
 
 # T17 — Build public register, sign-in, and accept-invite screens
