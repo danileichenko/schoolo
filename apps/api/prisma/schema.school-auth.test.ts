@@ -36,3 +36,19 @@ describe("school-auth schema — staff_members (AC-01)", () => {
     expect(sql).toContain("staff_members_work_email_key");
   });
 });
+
+describe("school-auth schema — teacher_invites (AC-03)", () => {
+  it("declares TeacherInvite with unique tokenHash", () => {
+    const schema = readFileSync(join(prismaDir, "schema.prisma"), "utf8");
+    expect(schema).toMatch(/model TeacherInvite \{[\s\S]*?@@unique\(\[tokenHash\]\)/);
+  });
+
+  it("has promoted teacher_invites migration", () => {
+    const sql = readFileSync(
+      join(prismaDir, "migrations/20261003160200_create_teacher_invites/migration.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS teacher_invites");
+    expect(sql).toContain("teacher_invites_token_hash_key");
+  });
+});

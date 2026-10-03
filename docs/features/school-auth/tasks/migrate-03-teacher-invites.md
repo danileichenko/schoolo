@@ -9,7 +9,7 @@ files_hint: ["docs/features/school-auth/migrations/03_create_teacher_invites.up.
 owner: "Backend Lead"
 estimate: "S"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T3 — Promote teacher_invites table migration

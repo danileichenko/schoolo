@@ -7,7 +7,7 @@
 |---|---|---|---|---|---|---|
 | T1 | Promote unique schools.name migration | migration | Backend Lead | S | — | done |
 | T2 | Promote staff_members table migration | migration | Backend Lead | S | T1 | done |
-| T3 | Promote teacher_invites table migration | migration | Backend Lead | S | T1 | todo |
+| T3 | Promote teacher_invites table migration | migration | Backend Lead | S | T1 | done |
 | T4 | Promote sessions table migration | migration | Backend Lead | S | T2 | todo |
 | T5 | Implement School domain unique-name rules | domain | Backend Lead | S | — | done |
 | T6 | Implement staff, invite, and session domain rules | domain | Backend Lead | M | — | done |

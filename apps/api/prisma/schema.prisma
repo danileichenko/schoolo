@@ -8,10 +8,11 @@ datasource db {
 }
 
 model School {
-  id           String        @id
-  name         String
-  createdAt    DateTime      @default(now()) @map("created_at")
-  staffMembers StaffMember[]
+  id             String          @id
+  name           String
+  createdAt      DateTime        @default(now()) @map("created_at")
+  staffMembers   StaffMember[]
+  teacherInvites TeacherInvite[]
 
   @@unique([name])
   @@map("schools")
@@ -32,4 +33,20 @@ model StaffMember {
   @@unique([workEmail])
   @@index([schoolId])
   @@map("staff_members")
+}
+
+model TeacherInvite {
+  id        String   @id
+  schoolId  String   @map("school_id")
+  workEmail String   @map("work_email")
+  tokenHash String   @map("token_hash")
+  status    String
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
+  school    School   @relation(fields: [schoolId], references: [id])
+
+  @@unique([tokenHash])
+  @@index([schoolId])
+  @@index([schoolId, workEmail, status])
+  @@map("teacher_invites")
 }
