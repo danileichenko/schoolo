@@ -52,3 +52,19 @@ describe("school-auth schema — teacher_invites (AC-03)", () => {
     expect(sql).toContain("teacher_invites_token_hash_key");
   });
 });
+
+describe("school-auth schema — sessions (AC-07)", () => {
+  it("declares Session with unique tokenHash", () => {
+    const schema = readFileSync(join(prismaDir, "schema.prisma"), "utf8");
+    expect(schema).toMatch(/model Session \{[\s\S]*?@@unique\(\[tokenHash\]\)/);
+  });
+
+  it("has promoted sessions migration", () => {
+    const sql = readFileSync(
+      join(prismaDir, "migrations/20261003160300_create_sessions/migration.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS sessions");
+    expect(sql).toContain("sessions_token_hash_key");
+  });
+});

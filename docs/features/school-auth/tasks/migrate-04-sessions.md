@@ -9,7 +9,7 @@ files_hint: ["docs/features/school-auth/migrations/04_create_sessions.up.sql", "
 owner: "Backend Lead"
 estimate: "S"
 context_budget: "S"
-status: "todo"
+status: "done"
 ---
 
 # T4 — Promote sessions table migration
