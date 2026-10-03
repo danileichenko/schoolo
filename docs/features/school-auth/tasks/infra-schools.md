@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/schools/infra/"]
 owner: "Backend Lead"
 estimate: "S"
 context_budget: "S"
-status: "todo"
+status: "done"
 ---
 
 # T7 — Wire schools Prisma repository adapter
