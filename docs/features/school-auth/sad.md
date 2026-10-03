@@ -143,44 +143,43 @@ C4Container
 
 ## 6. Runtime view
 
-**Critical flow 1: Register school**
+### Register school
 
 ```mermaid
 sequenceDiagram
-    actor SchoolAdmin
-    participant Web as Staff web
-    participant Api as API
-    participant Store as Primary database
-    SchoolAdmin->>Web: Submits school display name, work email, password
-    Web->>Api: Register school
-    Api->>Store: Create school tenant and School Admin
-    Store-->>Api: ok
-    Api->>Store: Create session
-    Store-->>Api: ok
-    Api-->>Web: Session established
-    Web-->>SchoolAdmin: Opens school administration
+    autonumber
+    actor A as SchoolAdmin
+    participant UI as ui
+    participant S as service
+    participant D as data-store
+
+    Note over A,S: Precondition: prospective School Admin is not yet signed in
+    A->>UI: Submit school display name, work email, password
+    UI->>S: Register school
+    alt invalid display name, email, or password too short
+        S-->>UI: Validation errors naming the fields
+        UI-->>A: Show what to correct
+    else display name already in use
+        S->>D: Lookup school by display name
+        D-->>S: found
+        S-->>UI: School name already in use
+        UI-->>A: Explain name is taken
+    else registration succeeds
+        S->>D: Lookup school by display name
+        D-->>S: not found
+        S->>D: Write school tenant and School Admin
+        Note over S,D: persists School and School Admin staff record
+        D-->>S: ack
+        S->>D: Write session
+        Note over S,D: persists Session
+        D-->>S: ack
+        S-->>UI: Session established
+        UI-->>A: Open school administration
+    end
+    Note over A,S: Postcondition on success: School Admin can open school administration for the new tenant
 ```
 
-**Critical flow 2: Invite Teacher**
-
-```mermaid
-sequenceDiagram
-    actor SchoolAdmin
-    participant Web as Staff web
-    participant Api as API
-    participant Store as Primary database
-    participant Email as Email provider
-    SchoolAdmin->>Web: Invites Teacher by work email
-    Web->>Api: Invite Teacher
-    Api->>Store: Create pending invite
-    Store-->>Api: ok
-    Api->>Email: Enqueue invite message
-    Email-->>Api: accepted
-    Api-->>Web: Pending on roster
-    Web-->>SchoolAdmin: Sees awaiting acceptance
-```
-
-Seed flows only — `/sdd:sequences school-auth` covers remaining ACs.
+<!-- remaining flows: Invite teacher, Reissue invite, Accept invite, Staff sign in, Revoke teacher access, Cross-school boundary -->
 
 ## 7. Deployment view
 
