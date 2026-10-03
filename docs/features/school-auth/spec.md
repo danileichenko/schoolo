@@ -174,10 +174,12 @@ Ideation note (medium depth): the main failure modes are undelivered invite emai
 
 | Aspect | Target | Measurement |
 |---|---|---|
-| Latency p95 school registration (complete flow) | ≤ TBD | owner: Tech Lead, due: before sdd:design |
-| Latency p95 staff sign-in | ≤ TBD | owner: Tech Lead, due: before sdd:design |
+| Latency p95 school registration (complete flow) | ≤ 2s | registration duration histogram in staging/production |
+| Latency p95 staff sign-in | ≤ 500ms | sign-in duration histogram in staging/production |
 | Availability auth flows | 99.5% monthly | auth success rate in production monitoring |
 | Invite completion rate (pilot) | ≥ 70% within 7 days of invite | product analytics on invite → active Teacher |
+| Registration rate limit | ≤ 5/hour per contact domain | rate-limit counter + ops alert |
+| Failed sign-in lockout | 5 failures → lock 15 min | lockout events metric |
 
 ## 6.1 Security / privacy
 
@@ -201,8 +203,9 @@ Ideation note (medium depth): the main failure modes are undelivered invite emai
 
 ## 8. Open questions
 
-- [ ] Latency targets for registration and sign-in flows? Default now: set during design from expected pilot load. — owner: Tech Lead, due: before sdd:design
-- [ ] Exact rate-limit thresholds for registrations and failed sign-ins? Default now: conservative pilot defaults in design. — owner: Security Lead, due: before sdd:design
+- [x] Latency targets for registration and sign-in flows? Resolved in design: p95 registration ≤ 2s; p95 sign-in ≤ 500ms. — owner: Tech Lead, due: done in sdd:design
+- [x] Exact rate-limit thresholds for registrations and failed sign-ins? Resolved in design: ≤ 5 registrations/hour per contact domain; lockout after 5 failures / 15 min. — owner: Security Lead, due: done in sdd:design
+- [ ] Which transactional email provider for pilot (and local logging adapter vs sandbox)? Default now: logging adapter in local/dev; provider chosen before pilot. — owner: Tech Lead, due: before pilot contract
 
 ## Clarify edits-log
 
