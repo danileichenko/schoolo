@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/schools/ports/", "apps/api/src/modules/users/
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T14 — Expose register, sign-in, and accept-invite HTTP ports

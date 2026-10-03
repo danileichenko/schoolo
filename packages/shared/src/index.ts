@@ -7,3 +7,12 @@ export const healthSchema = z.object({
 });
 
 export type HealthPayload = z.infer<typeof healthSchema>;
+
+export {
+  acceptInviteRequestSchema,
+  authSessionResponseSchema,
+  errorBodySchema,
+  inviteTeacherRequestSchema,
+  registerSchoolRequestSchema,
+  signInRequestSchema,
+} from "./school-auth.js";

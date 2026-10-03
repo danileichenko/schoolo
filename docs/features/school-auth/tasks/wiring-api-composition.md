@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/app.ts", "apps/api/src/server.ts", "apps/api/src/modu
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T16 — Compose DI, session cookie middleware, and route registration

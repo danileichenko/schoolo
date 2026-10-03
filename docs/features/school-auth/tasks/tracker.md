@@ -18,9 +18,9 @@
 | T11 | Implement AcceptInvite use case | app | Backend Lead | M | T8 | done |
 | T12 | Implement SignIn use case with lockout | app | Backend Lead | M | T8 | done |
 | T13 | Implement roster, revoke, and tenancy checks | app | Backend Lead | M | T7, T8 | done |
-| T14 | Expose register, sign-in, and accept-invite HTTP ports | ports | Backend Lead | M | T9, T11, T12 | todo |
-| T15 | Expose invite, reissue, roster, and revoke HTTP ports | ports | Backend Lead | M | T10, T13 | todo |
-| T16 | Compose DI, session cookie middleware, and route registration | wiring | Backend Lead | M | T14, T15 | todo |
+| T14 | Expose register, sign-in, and accept-invite HTTP ports | ports | Backend Lead | M | T9, T11, T12 | done |
+| T15 | Expose invite, reissue, roster, and revoke HTTP ports | ports | Backend Lead | M | T10, T13 | done |
+| T16 | Compose DI, session cookie middleware, and route registration | wiring | Backend Lead | M | T14, T15 | done |
 | T17 | Build public register, sign-in, and accept-invite screens | ui | Frontend Lead | L | T16 | todo |
 | T18 | Build school administration staff roster screen | ui | Frontend Lead | L | T16 | todo |
 | T19 | Build teacher workspace shell placeholder | ui | Frontend Lead | S | T16 | todo |

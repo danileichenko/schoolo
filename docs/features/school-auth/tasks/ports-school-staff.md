@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/users/ports/", "apps/api/src/modules/schools/
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T15 — Expose invite, reissue, roster, and revoke HTTP ports
