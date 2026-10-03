@@ -1,0 +1,502 @@
+openapi: 3.1.0
+
+info:
+  title: school-auth API
+  version: 0.1.0
+  description: |
+    Staff-identity and tenancy foundation for schoolo: School Admin self-registers a school,
+    invites Teachers by work email, and both roles sign in with school-scoped sessions.
+    Students and parents are out of scope for this feature.
+
+servers:
+  - url: http://localhost:3001
+    description: Local API
+  - url: https://api.example.test
+    description: Example production host
+
+security:
+  - CookieAuth: []
+
+paths:
+  /api/v1/auth/register-school:
+    post:
+      summary: Register school and School Admin
+      operationId: registerSchool
+      security: []
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterSchoolRequest"
+            example:
+              name: "Pilot School"
+              work_email: "admin@example.test"
+              password: "correct-horse-battery"
+      responses:
+        "201":
+          description: School created; session established
+          headers:
+            Set-Cookie:
+              description: HTTP-only session cookie
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+              example:
+                school:
+                  id: "01HZXSCHOOL000000000000000"
+                  name: "Pilot School"
+                staff:
+                  id: "01HZADMIN00000000000000000"
+                  role: school_admin
+                  status: active
+                  work_email: "admin@example.test"
+        "400":
+          description: Invalid display name, email, or password too short
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: school.validation_failed
+                message: Required information is missing or invalid
+                details:
+                  fields: ["name", "work_email", "password"]
+        "409":
+          description: School display name already in use
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: school.name_taken
+                message: School name is already in use
+        "429":
+          description: Registration rate limit exceeded
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: school.registration_rate_limited
+                message: Too many registration attempts for this contact domain
+
+  /api/v1/auth/sign-in:
+    post:
+      summary: Staff sign in
+      operationId: signIn
+      security: []
+      tags: [auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SignInRequest"
+            example:
+              work_email: "teacher@example.test"
+              password: "correct-horse-battery"
+      responses:
+        "200":
+          description: Session established
+          headers:
+            Set-Cookie:
+              description: HTTP-only session cookie
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "401":
+          description: Credentials do not match active staff (no cross-school email reveal)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: auth.denied
+                message: Access denied
+        "423":
+          description: Account temporarily locked after failed attempts
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: auth.locked
+                message: Account temporarily locked
+
+  /api/v1/invites/{inviteToken}/accept:
+    post:
+      summary: Accept Teacher invite
+      operationId: acceptInvite
+      security: []
+      tags: [invites]
+      parameters:
+        - in: path
+          name: inviteToken
+          required: true
+          description: Opaque invite secret from the email link (server stores only the hash)
+          schema: { type: string, minLength: 16 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AcceptInviteRequest"
+            example:
+              password: "correct-horse-battery"
+      responses:
+        "201":
+          description: Teacher activated; session established
+          headers:
+            Set-Cookie:
+              schema: { type: string }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "400":
+          description: Password too short or invalid
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: invite.validation_failed
+                message: Password must be at least 12 characters
+        "409":
+          description: Work email already active staff at another school
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: invite.email_elsewhere
+                message: Email is already tied to another school
+        "410":
+          description: Invite expired or already used
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: invite.invalid
+                message: Request a new invite from your School Admin
+
+  /api/v1/schools/{schoolId}/teacher-invites:
+    post:
+      summary: Invite Teacher by work email
+      operationId: inviteTeacher
+      tags: [invites]
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/InviteTeacherRequest"
+            example:
+              work_email: "teacher@example.test"
+      responses:
+        "201":
+          description: Pending invite created; email enqueued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherInvite"
+              example:
+                id: "01HZINVITE0000000000000000"
+                school_id: "01HZXSCHOOL000000000000000"
+                work_email: "teacher@example.test"
+                status: pending
+                expires_at: "2026-10-17T12:00:00.000Z"
+                created_at: "2026-10-03T12:00:00.000Z"
+        "403":
+          description: Caller is not School Admin for this school
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: staff.forbidden
+                message: Only the School Admin may manage staff
+        "404":
+          description: School not found for caller tenant (or cross-tenant denial)
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: school.forbidden
+                message: Access denied
+        "409":
+          description: Email already pending or active at this school
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: invite.duplicate
+                message: Person is already invited or active on the staff roster
+
+  /api/v1/schools/{schoolId}/teacher-invites/{inviteId}/reissue:
+    post:
+      summary: Reissue Teacher invite
+      operationId: reissueTeacherInvite
+      tags: [invites]
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+        - in: path
+          name: inviteId
+          required: true
+          schema: { type: string, minLength: 26, maxLength: 26 }
+      responses:
+        "201":
+          description: Prior invite invalidated; new pending invite created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TeacherInvite"
+        "403":
+          description: Caller is not School Admin
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: staff.forbidden
+                message: Only the School Admin may manage staff
+        "404":
+          description: Invite not found for this school
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: invite.not_found
+                message: Invite not found
+
+  /api/v1/schools/{schoolId}/staff-roster:
+    get:
+      summary: List staff roster
+      operationId: listStaffRoster
+      tags: [staff]
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+        - in: query
+          name: after
+          schema: { type: string }
+        - in: query
+          name: before
+          schema: { type: string }
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+      responses:
+        "200":
+          description: Roster page (Teachers and invite rows for School Admin)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffRosterPage"
+        "403":
+          description: Cross-school or non-admin access denied
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: school.forbidden
+                message: Access denied
+
+  /api/v1/schools/{schoolId}/staff/{staffMemberId}/revoke:
+    post:
+      summary: Revoke Teacher access
+      operationId: revokeTeacher
+      tags: [staff]
+      parameters:
+        - $ref: "#/components/parameters/SchoolId"
+        - in: path
+          name: staffMemberId
+          required: true
+          schema: { type: string, minLength: 26, maxLength: 26 }
+      responses:
+        "200":
+          description: Teacher marked inactive; sessions invalidated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StaffMember"
+              example:
+                id: "01HZTEACHER000000000000000"
+                school_id: "01HZXSCHOOL000000000000000"
+                work_email: "teacher@example.test"
+                role: teacher
+                status: inactive
+        "403":
+          description: Caller is not School Admin
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: staff.forbidden
+                message: Only the School Admin may manage staff
+        "404":
+          description: Staff member not found in this school
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/Error" }
+              example:
+                code: staff.not_found
+                message: Staff member not found
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: schoolo_session
+      description: HTTP-only session cookie; server-side session row (ADR 0003)
+
+  parameters:
+    SchoolId:
+      in: path
+      name: schoolId
+      required: true
+      schema: { type: string, minLength: 26, maxLength: 26 }
+
+  responses:
+    Error:
+      description: Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Error"
+
+  schemas:
+    Error:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Neutral module.error_name
+          examples: [school.name_taken]
+        message:
+          type: string
+        details:
+          type: object
+          additionalProperties: true
+
+    RegisterSchoolRequest:
+      type: object
+      required: [name, work_email, password]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: School display name → schools.name
+        work_email:
+          type: string
+          format: email
+          description: School Admin work email → staff_members.work_email
+        password:
+          type: string
+          minLength: 12
+          writeOnly: true
+
+    SignInRequest:
+      type: object
+      required: [work_email, password]
+      properties:
+        work_email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 1
+          writeOnly: true
+
+    AcceptInviteRequest:
+      type: object
+      required: [password]
+      properties:
+        password:
+          type: string
+          minLength: 12
+          writeOnly: true
+
+    InviteTeacherRequest:
+      type: object
+      required: [work_email]
+      properties:
+        work_email:
+          type: string
+          format: email
+
+    School:
+      type: object
+      required: [id, name]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        created_at: { type: string, format: date-time }
+
+    StaffMember:
+      type: object
+      required: [id, school_id, work_email, role, status]
+      properties:
+        id: { type: string }
+        school_id: { type: string }
+        work_email: { type: string, format: email }
+        role:
+          type: string
+          enum: [school_admin, teacher]
+        status:
+          type: string
+          enum: [active, inactive]
+
+    TeacherInvite:
+      type: object
+      required: [id, school_id, work_email, status, expires_at, created_at]
+      properties:
+        id: { type: string }
+        school_id: { type: string }
+        work_email: { type: string, format: email }
+        status:
+          type: string
+          enum: [pending, expired, used, invalid]
+        expires_at: { type: string, format: date-time }
+        created_at: { type: string, format: date-time }
+
+    AuthSessionResponse:
+      type: object
+      required: [school, staff]
+      properties:
+        school:
+          $ref: "#/components/schemas/School"
+        staff:
+          $ref: "#/components/schemas/StaffMember"
+
+    StaffRosterItem:
+      type: object
+      required: [kind, work_email, status]
+      properties:
+        kind:
+          type: string
+          enum: [staff, invite]
+        id: { type: string }
+        work_email: { type: string, format: email }
+        role:
+          type: [string, "null"]
+          enum: [school_admin, teacher, null]
+        status:
+          type: string
+          description: staff active/inactive or invite pending/expired/invalid
+
+    StaffRosterPage:
+      type: object
+      required: [items, has_next, has_prev]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/StaffRosterItem"
+        has_next: { type: boolean }
+        has_prev: { type: boolean }
+        next_cursor:
+          type: [string, "null"]
+        prev_cursor:
+          type: [string, "null"]
