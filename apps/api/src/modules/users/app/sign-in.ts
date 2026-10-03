@@ -37,16 +37,20 @@ export async function signIn(
       message: "Account temporarily locked. Try again later.",
     };
   }
-  if (!verifyPassword(input.password, member.passwordHash)) {
+  const unlocked =
+    member.lockedUntil && member.lockedUntil.getTime() <= now.getTime()
+      ? { ...member, failedSignInCount: 0, lockedUntil: null }
+      : member;
+  if (!verifyPassword(input.password, unlocked.passwordHash)) {
     const next = recordFailedSignIn(
       {
-        failedSignInCount: member.failedSignInCount,
-        lockedUntil: member.lockedUntil,
+        failedSignInCount: unlocked.failedSignInCount,
+        lockedUntil: unlocked.lockedUntil,
       },
       now,
     );
     await deps.staff.update({
-      ...member,
+      ...unlocked,
       failedSignInCount: next.failedSignInCount,
       lockedUntil: next.lockedUntil,
     });
@@ -62,14 +66,14 @@ export async function signIn(
   }
 
   await deps.staff.update({
-    ...member,
+    ...unlocked,
     failedSignInCount: 0,
     lockedUntil: null,
   });
   const sessionToken = newOpaqueToken();
   await deps.sessions.create({
     id: newId(),
-    staffMemberId: member.id,
+    staffMemberId: unlocked.id,
     tokenHash: hashToken(sessionToken),
     expiresAt: new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000),
     revokedAt: null,
@@ -77,12 +81,12 @@ export async function signIn(
   });
   return {
     ok: true,
-    school: { id: member.schoolId },
+    school: { id: unlocked.schoolId },
     staff: {
-      id: member.id,
-      role: member.role,
+      id: unlocked.id,
+      role: unlocked.role,
       status: "active",
-      workEmail: member.workEmail,
+      workEmail: unlocked.workEmail,
     },
     sessionToken,
   };

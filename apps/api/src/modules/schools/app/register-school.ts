@@ -110,6 +110,16 @@ export async function registerSchool(
     return { ok: false, code: err.code, message: err.message };
   }
 
+  const emailTaken = await deps.staff.findByWorkEmail(workEmail);
+  if (emailTaken) {
+    return {
+      ok: false,
+      code: "school.validation_failed",
+      message: "Required information is missing or invalid",
+      fields: ["work_email"],
+    };
+  }
+
   const schoolId = newId();
   const staffId = newId();
   try {
@@ -127,17 +137,30 @@ export async function registerSchool(
     throw e;
   }
 
-  await deps.staff.create({
-    id: staffId,
-    schoolId,
-    workEmail,
-    passwordHash: hashPassword(input.password),
-    role: "school_admin",
-    status: "active",
-    failedSignInCount: 0,
-    lockedUntil: null,
-    createdAt: now,
-  });
+  try {
+    await deps.staff.create({
+      id: staffId,
+      schoolId,
+      workEmail,
+      passwordHash: hashPassword(input.password),
+      role: "school_admin",
+      status: "active",
+      failedSignInCount: 0,
+      lockedUntil: null,
+      createdAt: now,
+    });
+  } catch (e) {
+    const code = (e as { code?: string }).code;
+    if (code === "P2002") {
+      return {
+        ok: false,
+        code: "school.validation_failed",
+        message: "Required information is missing or invalid",
+        fields: ["work_email"],
+      };
+    }
+    throw e;
+  }
 
   const sessionToken = newOpaqueToken();
   await deps.sessions.create({

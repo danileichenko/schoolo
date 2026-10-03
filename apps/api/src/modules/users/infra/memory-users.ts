@@ -118,5 +118,16 @@ export class LoggingEmailAdapter implements EmailPort {
     inviteUrl: string;
   }): Promise<void> {
     this.sent.push(input);
+    // Local/dev fallback (ADR 0004): log delivery intent without the raw token.
+    const pathOnly = input.inviteUrl.replace(/\/[^/]+$/, "/[redacted]");
+    console.info(
+      JSON.stringify({
+        module: "users",
+        event: "teacher_invite_enqueued",
+        to: input.to,
+        schoolName: input.schoolName,
+        inviteUrl: pathOnly,
+      }),
+    );
   }
 }

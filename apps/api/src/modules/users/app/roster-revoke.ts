@@ -24,13 +24,24 @@ export async function listStaffRoster(
   | { ok: true; rows: RosterRow[] }
   | { ok: false; code: "school.forbidden"; message: string }
 > {
-  if (input.actor.schoolId !== input.schoolId || input.actor.status !== "active") {
+  if (
+    input.actor.role !== "school_admin" ||
+    input.actor.status !== "active"
+  ) {
+    return {
+      ok: false,
+      code: "school.forbidden",
+      message: "Only the School Admin may manage staff",
+    };
+  }
+  if (input.actor.schoolId !== input.schoolId) {
     return {
       ok: false,
       code: "school.forbidden",
       message: "You cannot access another school's administration",
     };
   }
+  const now = new Date();
   const staff = await deps.staff.listBySchool(input.schoolId);
   const invites = await deps.invites.listBySchool(input.schoolId);
   const rows: RosterRow[] = [
@@ -43,12 +54,16 @@ export async function listStaffRoster(
         status: s.status,
         role: s.role,
       })),
-    ...invites.map((i) => ({
-      kind: "invite" as const,
-      id: i.id,
-      workEmail: i.workEmail,
-      status: i.status,
-    })),
+    ...invites.map((i) => {
+      const expired =
+        i.status === "pending" && i.expiresAt.getTime() <= now.getTime();
+      return {
+        kind: "invite" as const,
+        id: i.id,
+        workEmail: i.workEmail,
+        status: expired ? "expired" : i.status,
+      };
+    }),
   ];
   return { ok: true, rows };
 }

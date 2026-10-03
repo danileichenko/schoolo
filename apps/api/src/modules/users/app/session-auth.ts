@@ -2,6 +2,7 @@ import type { SessionRepository, StaffMemberRecord, StaffMemberRepository } from
 import { hashToken } from "./crypto.js";
 
 export const SESSION_COOKIE = "schoolo_session";
+const SESSION_MAX_AGE_SEC = 7 * 24 * 60 * 60;
 
 export async function resolveSessionActor(
   sessionToken: string | undefined,
@@ -18,5 +19,15 @@ export async function resolveSessionActor(
 }
 
 export function sessionCookieHeader(token: string): string {
-  return `${SESSION_COOKIE}=${token}; HttpOnly; Path=/; SameSite=Lax`;
+  const secure =
+    process.env.COOKIE_SECURE === "true" || process.env.NODE_ENV === "production";
+  const parts = [
+    `${SESSION_COOKIE}=${token}`,
+    "HttpOnly",
+    "Path=/",
+    "SameSite=Lax",
+    `Max-Age=${SESSION_MAX_AGE_SEC}`,
+  ];
+  if (secure) parts.push("Secure");
+  return parts.join("; ");
 }

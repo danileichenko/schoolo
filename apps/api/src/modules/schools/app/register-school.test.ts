@@ -70,4 +70,29 @@ describe("registerSchool (AC-01, AC-02, AC-02b)", () => {
     );
     expect(second).toMatchObject({ ok: false, code: "school.name_taken" });
   });
+
+  it("rejects already-used work email without orphaning a school", async () => {
+    const d = deps();
+    await registerSchool(
+      {
+        name: "Pilot School",
+        workEmail: "admin@example.test",
+        password: "correct-horse",
+      },
+      d,
+    );
+    const second = await registerSchool(
+      {
+        name: "Other School",
+        workEmail: "admin@example.test",
+        password: "correct-horse",
+      },
+      d,
+    );
+    expect(second).toMatchObject({
+      ok: false,
+      code: "school.validation_failed",
+    });
+    expect(await d.schools.findByName("Other School")).toBeNull();
+  });
 });

@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import sensible from "@fastify/sensible";
 import Fastify, { type FastifyInstance } from "fastify";
 import { healthSchema } from "@schoolo/shared";
@@ -8,6 +9,12 @@ import { registerSchoolStaffRoutes } from "./modules/users/ports/school-staff-ro
 export async function buildApp(deps: AppDeps = createMemoryDeps()): Promise<FastifyInstance> {
   const app = Fastify({ logger: false });
   await app.register(sensible);
+  await app.register(cors, {
+    origin: (process.env.WEB_ORIGIN ?? "http://localhost:3000")
+      .split(",")
+      .map((s) => s.trim()),
+    credentials: true,
+  });
 
   app.get("/health", async () => {
     const payload = { status: "ok" as const, service: "schoolo-api" };

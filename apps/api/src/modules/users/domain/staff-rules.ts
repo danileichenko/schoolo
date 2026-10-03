@@ -41,19 +41,19 @@ export function canAcceptInvite(input: {
       code: "invite.invalid" | "invite.email_elsewhere";
       message: string;
     } {
-  if (input.emailActiveElsewhere) {
-    return {
-      ok: false,
-      code: "invite.email_elsewhere",
-      message: "This email is already tied to another school",
-    };
-  }
   const expiredByTime = input.expiresAt.getTime() <= input.now.getTime();
   if (input.status !== "pending" || expiredByTime) {
     return {
       ok: false,
       code: "invite.invalid",
       message: "Request a new invite from your School Admin",
+    };
+  }
+  if (input.emailActiveElsewhere) {
+    return {
+      ok: false,
+      code: "invite.email_elsewhere",
+      message: "This email is already tied to another school",
     };
   }
   return { ok: true };

@@ -47,10 +47,7 @@ export async function inviteTeacher(
   const email = input.workEmail.trim().toLowerCase();
   const active = await deps.staff.findByWorkEmail(email);
   const hasActiveTeacher =
-    !!active &&
-    active.schoolId === input.schoolId &&
-    active.role === "teacher" &&
-    active.status === "active";
+    !!active && active.schoolId === input.schoolId && active.status === "active";
   const hasPendingInvite = await deps.invites.hasPendingForEmail(
     input.schoolId,
     email,
@@ -121,6 +118,13 @@ export async function reissueTeacherInvite(
   }
   const prior = await deps.invites.findById(input.inviteId);
   if (!prior || prior.schoolId !== input.schoolId) {
+    return {
+      ok: false,
+      code: "invite.not_found",
+      message: "Invite not found",
+    };
+  }
+  if (prior.status !== "pending" && prior.status !== "expired") {
     return {
       ok: false,
       code: "invite.not_found",

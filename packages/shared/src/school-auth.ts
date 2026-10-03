@@ -22,7 +22,7 @@ export const inviteTeacherRequestSchema = z.object({
 export const authSessionResponseSchema = z.object({
   school: z.object({
     id: z.string(),
-    name: z.string().optional(),
+    name: z.string(),
   }),
   staff: z.object({
     id: z.string(),

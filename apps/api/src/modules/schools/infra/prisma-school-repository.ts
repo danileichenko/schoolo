@@ -5,6 +5,12 @@ import type { SchoolRecord, SchoolRepository } from "../app/school-repository.js
 export class PrismaSchoolRepository implements SchoolRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
+  async findById(id: string): Promise<SchoolRecord | null> {
+    const row = await this.prisma.school.findUnique({ where: { id } });
+    if (!row) return null;
+    return { id: row.id, name: row.name, createdAt: row.createdAt };
+  }
+
   async findByName(name: string): Promise<SchoolRecord | null> {
     const row = await this.prisma.school.findUnique({ where: { name } });
     if (!row) return null;

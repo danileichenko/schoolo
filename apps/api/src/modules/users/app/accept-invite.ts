@@ -54,34 +54,55 @@ export async function acceptInvite(
     };
   }
   const now = deps.now ?? new Date();
-  const elsewhere = await deps.staff.findByWorkEmail(invite.workEmail);
-  const emailActiveElsewhere = !!(
-    elsewhere &&
-    elsewhere.status === "active" &&
-    elsewhere.schoolId !== invite.schoolId
-  );
-  const check = canAcceptInvite({
+  const existing = await deps.staff.findByWorkEmail(invite.workEmail);
+  const validity = canAcceptInvite({
     status: invite.status,
     expiresAt: invite.expiresAt,
     now,
-    emailActiveElsewhere,
+    emailActiveElsewhere: false,
   });
-  if (!check.ok) {
-    return { ok: false, code: check.code, message: check.message };
+  if (!validity.ok) {
+    return { ok: false, code: validity.code, message: validity.message };
+  }
+  if (existing && existing.status === "active") {
+    if (existing.schoolId === invite.schoolId) {
+      return {
+        ok: false,
+        code: "invite.invalid",
+        message: "Request a new invite from your School Admin",
+      };
+    }
+    return {
+      ok: false,
+      code: "invite.email_elsewhere",
+      message: "This email is already tied to another school",
+    };
   }
 
   const staffId = newId();
-  await deps.staff.create({
-    id: staffId,
-    schoolId: invite.schoolId,
-    workEmail: invite.workEmail,
-    passwordHash: hashPassword(input.password),
-    role: "teacher",
-    status: "active",
-    failedSignInCount: 0,
-    lockedUntil: null,
-    createdAt: now,
-  });
+  try {
+    await deps.staff.create({
+      id: staffId,
+      schoolId: invite.schoolId,
+      workEmail: invite.workEmail,
+      passwordHash: hashPassword(input.password),
+      role: "teacher",
+      status: "active",
+      failedSignInCount: 0,
+      lockedUntil: null,
+      createdAt: now,
+    });
+  } catch (e) {
+    const code = (e as { code?: string }).code;
+    if (code === "P2002") {
+      return {
+        ok: false,
+        code: "invite.invalid",
+        message: "Request a new invite from your School Admin",
+      };
+    }
+    throw e;
+  }
   await deps.invites.update({ ...invite, status: "used" });
   const sessionToken = newOpaqueToken();
   await deps.sessions.create({

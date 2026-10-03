@@ -206,6 +206,12 @@ Ideation note (medium depth): the main failure modes are undelivered invite emai
 - [x] Latency targets for registration and sign-in flows? Resolved in design: p95 registration ≤ 2s; p95 sign-in ≤ 500ms. — owner: Tech Lead, due: done in sdd:design
 - [x] Exact rate-limit thresholds for registrations and failed sign-ins? Resolved in design: ≤ 5 registrations/hour per contact domain; lockout after 5 failures / 15 min. — owner: Security Lead, due: done in sdd:design
 - [ ] Which transactional email provider for pilot (and local logging adapter vs sandbox)? Default now: logging adapter in local/dev; provider chosen before pilot. — owner: Tech Lead, due: before pilot contract
+- [ ] Align HTTP responses fully with OpenAPI (roster pagination cursors, snake_case fields, invite timestamps, revoke body, 404 vs 403 cross-tenant). Deferred from review-2026-10-03. — owner: Backend Lead, due: before pilot
+- [ ] Switch application IDs from hex to ULID (26-char) per CLAUDE.md / OpenAPI path params. Deferred from review-2026-10-03. — owner: Backend Lead, due: before pilot
+- [ ] Add component + e2e-through-UI + ephemeral-Postgres integration suites per test-plan.md. Deferred from review-2026-10-03. — owner: QA + Frontend Lead, due: before pilot
+- [ ] Move auth pages to hybrid server actions (ADR 0002) instead of browser→API CORS path. Deferred from review-2026-10-03. — owner: Frontend Lead, due: before pilot
+- [ ] Sign-out endpoint + UI (cookie + session revoke). Deferred from review-2026-10-03. — owner: Backend Lead, due: before pilot
+- [ ] Shared rate-limit store, async scrypt, structured metrics/tracing for auth NFRs. Deferred from review-2026-10-03. — owner: Tech Lead, due: before pilot
 
 ## Clarify edits-log
 

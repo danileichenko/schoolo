@@ -8,7 +8,20 @@ import type { AppDeps } from "../../../composition.js";
 import { registerSchool } from "../../schools/app/register-school.js";
 import { acceptInvite } from "../app/accept-invite.js";
 import { signIn } from "../app/sign-in.js";
-import { sessionCookieHeader } from "../app/session-auth.js";
+import {
+  resolveSessionActor,
+  SESSION_COOKIE,
+  sessionCookieHeader,
+} from "../app/session-auth.js";
+
+function cookieValue(header: string | undefined, name: string): string | undefined {
+  if (!header) return undefined;
+  const part = header
+    .split(";")
+    .map((s) => s.trim())
+    .find((s) => s.startsWith(`${name}=`));
+  return part?.slice(name.length + 1);
+}
 
 export async function registerAuthRoutes(
   app: FastifyInstance,
@@ -44,7 +57,6 @@ export async function registerAuthRoutes(
         details: result.fields ? { fields: result.fields } : undefined,
       });
     }
-    deps.schoolNames.set(result.school.id, result.school.name);
     reply.header("Set-Cookie", sessionCookieHeader(result.sessionToken));
     return reply.code(201).send({
       school: result.school,
@@ -79,11 +91,12 @@ export async function registerAuthRoutes(
         message: result.message,
       });
     }
+    const school = await deps.schools.findById(result.school.id);
     reply.header("Set-Cookie", sessionCookieHeader(result.sessionToken));
     return reply.code(200).send({
       school: {
         id: result.school.id,
-        name: deps.schoolNames.get(result.school.id),
+        name: school?.name ?? "",
       },
       staff: {
         id: result.staff.id,
@@ -121,17 +134,36 @@ export async function registerAuthRoutes(
         details: result.fields ? { fields: result.fields } : undefined,
       });
     }
+    const school = await deps.schools.findById(result.school.id);
     reply.header("Set-Cookie", sessionCookieHeader(result.sessionToken));
     return reply.code(201).send({
       school: {
         id: result.school.id,
-        name: deps.schoolNames.get(result.school.id),
+        name: school?.name ?? "",
       },
       staff: {
         id: result.staff.id,
         role: result.staff.role,
         status: result.staff.status,
         work_email: result.staff.workEmail,
+      },
+    });
+  });
+
+  app.get("/api/v1/auth/me", async (request, reply) => {
+    const token = cookieValue(request.headers.cookie, SESSION_COOKIE);
+    const actor = await resolveSessionActor(token, deps);
+    if (!actor) {
+      return reply.code(401).send({ code: "auth.denied", message: "Access denied" });
+    }
+    const school = await deps.schools.findById(actor.schoolId);
+    return reply.code(200).send({
+      school: { id: actor.schoolId, name: school?.name ?? "" },
+      staff: {
+        id: actor.id,
+        role: actor.role,
+        status: actor.status,
+        work_email: actor.workEmail,
       },
     });
   });

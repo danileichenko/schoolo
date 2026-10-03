@@ -5,6 +5,7 @@ export type SchoolRecord = {
 };
 
 export type SchoolRepository = {
+  findById(id: string): Promise<SchoolRecord | null>;
   findByName(name: string): Promise<SchoolRecord | null>;
   create(school: SchoolRecord): Promise<SchoolRecord>;
 };

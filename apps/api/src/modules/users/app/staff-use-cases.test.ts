@@ -195,6 +195,36 @@ describe("sign in (AC-07, AC-08)", () => {
       message: "Access denied",
     });
   });
+
+  it("denies unknown and foreign-school emails with the same body (AC-08)", async () => {
+    const h = harness();
+    await seedAdmin(h, "school-a");
+    await h.staff.create({
+      id: "foreign",
+      schoolId: "school-b",
+      workEmail: "foreign@example.test",
+      passwordHash: hashPassword("correct-horse"),
+      role: "teacher",
+      status: "active",
+      failedSignInCount: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+    });
+    const unknown = await signIn(
+      { workEmail: "nobody@example.test", password: "correct-horse" },
+      h,
+    );
+    const foreign = await signIn(
+      { workEmail: "foreign@example.test", password: "wrong-password" },
+      h,
+    );
+    expect(unknown).toEqual(foreign);
+    expect(unknown).toMatchObject({
+      ok: false,
+      code: "auth.denied",
+      message: "Access denied",
+    });
+  });
 });
 
 describe("roster / revoke (AC-09, AC-10, AC-11)", () => {
@@ -262,6 +292,27 @@ describe("roster / revoke (AC-09, AC-10, AC-11)", () => {
     const admin = await seedAdmin(h, "school-a");
     const result = await listStaffRoster(
       { schoolId: "school-b", actor: admin },
+      h,
+    );
+    expect(result).toMatchObject({ ok: false, code: "school.forbidden" });
+  });
+
+  it("denies teacher reading roster", async () => {
+    const h = harness();
+    const teacher = {
+      id: "teacher-1",
+      schoolId: "school-a",
+      workEmail: "t@example.test",
+      passwordHash: hashPassword("correct-horse"),
+      role: "teacher" as const,
+      status: "active" as const,
+      failedSignInCount: 0,
+      lockedUntil: null,
+      createdAt: new Date(),
+    };
+    await h.staff.create(teacher);
+    const result = await listStaffRoster(
+      { schoolId: "school-a", actor: teacher },
       h,
     );
     expect(result).toMatchObject({ ok: false, code: "school.forbidden" });

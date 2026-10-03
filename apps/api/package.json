@@ -13,6 +13,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@fastify/cors": "^10.0.1",
     "@fastify/sensible": "^6.0.1",
     "@prisma/client": "^6.1.0",
     "@schoolo/shared": "workspace:*",
