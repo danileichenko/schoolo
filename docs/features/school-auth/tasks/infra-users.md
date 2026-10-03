@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/users/infra/"]
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T8 — Wire users Prisma repos and EmailPort adapter
