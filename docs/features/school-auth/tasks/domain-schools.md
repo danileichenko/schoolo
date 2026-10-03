@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/schools/domain/"]
 owner: "Backend Lead"
 estimate: "S"
 context_budget: "S"
-status: "todo"
+status: "done"
 ---
 
 # T5 — Implement School domain unique-name rules
