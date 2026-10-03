@@ -9,7 +9,7 @@ files_hint: ["apps/api/src/modules/users/domain/"]
 owner: "Backend Lead"
 estimate: "M"
 context_budget: "M"
-status: "todo"
+status: "done"
 ---
 
 # T6 — Implement staff, invite, and session domain rules

@@ -10,7 +10,7 @@
 | T3 | Promote teacher_invites table migration | migration | Backend Lead | S | T1 | todo |
 | T4 | Promote sessions table migration | migration | Backend Lead | S | T2 | todo |
 | T5 | Implement School domain unique-name rules | domain | Backend Lead | S | — | done |
-| T6 | Implement staff, invite, and session domain rules | domain | Backend Lead | M | — | todo |
+| T6 | Implement staff, invite, and session domain rules | domain | Backend Lead | M | — | done |
 | T7 | Wire schools Prisma repository adapter | infra | Backend Lead | S | T1, T5 | todo |
 | T8 | Wire users Prisma repos and EmailPort adapter | infra | Backend Lead | M | T2, T3, T4, T6 | todo |
 | T9 | Implement RegisterSchool use case | app | Backend Lead | M | T7, T8 | todo |
