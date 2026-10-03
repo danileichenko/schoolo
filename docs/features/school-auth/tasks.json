@@ -1,0 +1,382 @@
+{
+  "slug": "school-auth",
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Promote unique schools.name migration",
+      "layer": "migration",
+      "deps": [],
+      "acs": [
+        "AC-02b"
+      ],
+      "dod": "Staged 01 pair promoted; UNIQUE(schools.name) applies and reverts cleanly.",
+      "files_hint": [
+        "docs/features/school-auth/migrations/01_unique_schools_name.up.sql",
+        "docs/features/school-auth/migrations/01_unique_schools_name.down.sql",
+        "apps/api/prisma/schema.prisma"
+      ],
+      "file": "docs/features/school-auth/tasks/migrate-01-schools-name-unique.md"
+    },
+    {
+      "id": "T2",
+      "title": "Promote staff_members table migration",
+      "layer": "migration",
+      "deps": [
+        "T1"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-07"
+      ],
+      "dod": "staff_members table with global unique work_email applies and reverts cleanly.",
+      "files_hint": [
+        "docs/features/school-auth/migrations/02_create_staff_members.up.sql",
+        "docs/features/school-auth/migrations/02_create_staff_members.down.sql",
+        "apps/api/prisma/schema.prisma"
+      ],
+      "file": "docs/features/school-auth/tasks/migrate-02-staff-members.md"
+    },
+    {
+      "id": "T3",
+      "title": "Promote teacher_invites table migration",
+      "layer": "migration",
+      "deps": [
+        "T1"
+      ],
+      "acs": [
+        "AC-03",
+        "AC-05",
+        "AC-13"
+      ],
+      "dod": "teacher_invites table with token_hash UNIQUE applies and reverts cleanly.",
+      "files_hint": [
+        "docs/features/school-auth/migrations/03_create_teacher_invites.up.sql",
+        "docs/features/school-auth/migrations/03_create_teacher_invites.down.sql",
+        "apps/api/prisma/schema.prisma"
+      ],
+      "file": "docs/features/school-auth/tasks/migrate-03-teacher-invites.md"
+    },
+    {
+      "id": "T4",
+      "title": "Promote sessions table migration",
+      "layer": "migration",
+      "deps": [
+        "T2"
+      ],
+      "acs": [
+        "AC-07",
+        "AC-09"
+      ],
+      "dod": "sessions table with token_hash UNIQUE and staff_member FK applies and reverts cleanly.",
+      "files_hint": [
+        "docs/features/school-auth/migrations/04_create_sessions.up.sql",
+        "docs/features/school-auth/migrations/04_create_sessions.down.sql",
+        "apps/api/prisma/schema.prisma"
+      ],
+      "file": "docs/features/school-auth/tasks/migrate-04-sessions.md"
+    },
+    {
+      "id": "T5",
+      "title": "Implement School domain unique-name rules",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-02b"
+      ],
+      "dod": "Unit tests prove duplicate display-name invariant without Prisma.",
+      "files_hint": [
+        "apps/api/src/modules/schools/domain/"
+      ],
+      "file": "docs/features/school-auth/tasks/domain-schools.md"
+    },
+    {
+      "id": "T6",
+      "title": "Implement staff, invite, and session domain rules",
+      "layer": "domain",
+      "deps": [],
+      "acs": [
+        "AC-04",
+        "AC-05",
+        "AC-06",
+        "AC-06b",
+        "AC-08",
+        "AC-09"
+      ],
+      "dod": "Unit tests cover invite lifecycle, password min length, lockout counters, and revoke session invalidation rules.",
+      "files_hint": [
+        "apps/api/src/modules/users/domain/"
+      ],
+      "file": "docs/features/school-auth/tasks/domain-users.md"
+    },
+    {
+      "id": "T7",
+      "title": "Wire schools Prisma repository adapter",
+      "layer": "infra",
+      "deps": [
+        "T1",
+        "T5"
+      ],
+      "acs": [
+        "AC-02b"
+      ],
+      "dod": "Integration or repo test: create school + conflict on duplicate name.",
+      "files_hint": [
+        "apps/api/src/modules/schools/infra/"
+      ],
+      "file": "docs/features/school-auth/tasks/infra-schools.md"
+    },
+    {
+      "id": "T8",
+      "title": "Wire users Prisma repos and EmailPort adapter",
+      "layer": "infra",
+      "deps": [
+        "T2",
+        "T3",
+        "T4",
+        "T6"
+      ],
+      "acs": [
+        "AC-03",
+        "AC-07",
+        "AC-09"
+      ],
+      "dod": "Repo tests for staff/invite/session CRUD; EmailPort logging adapter records invite send without live SMTP.",
+      "files_hint": [
+        "apps/api/src/modules/users/infra/"
+      ],
+      "file": "docs/features/school-auth/tasks/infra-users.md"
+    },
+    {
+      "id": "T9",
+      "title": "Implement RegisterSchool use case",
+      "layer": "app",
+      "deps": [
+        "T7",
+        "T8"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-02b"
+      ],
+      "dod": "Unit/app tests: happy register creates school+admin+session; validation and name_taken fail as specified; rate limit 5/hour/domain.",
+      "files_hint": [
+        "apps/api/src/modules/schools/app/",
+        "apps/api/src/modules/users/app/"
+      ],
+      "file": "docs/features/school-auth/tasks/app-register-school.md"
+    },
+    {
+      "id": "T10",
+      "title": "Implement InviteTeacher and ReissueInvite use cases",
+      "layer": "app",
+      "deps": [
+        "T8"
+      ],
+      "acs": [
+        "AC-03",
+        "AC-04",
+        "AC-13"
+      ],
+      "dod": "App tests: pending invite + EmailPort call; duplicate blocked; reissue invalidates prior and creates new pending.",
+      "files_hint": [
+        "apps/api/src/modules/users/app/"
+      ],
+      "file": "docs/features/school-auth/tasks/app-invite-reissue.md"
+    },
+    {
+      "id": "T11",
+      "title": "Implement AcceptInvite use case",
+      "layer": "app",
+      "deps": [
+        "T8"
+      ],
+      "acs": [
+        "AC-05",
+        "AC-06",
+        "AC-06b",
+        "AC-12"
+      ],
+      "dod": "App tests: accept activates teacher+session; expired/used blocked; email-elsewhere blocked (AC-06b/AC-12).",
+      "files_hint": [
+        "apps/api/src/modules/users/app/"
+      ],
+      "file": "docs/features/school-auth/tasks/app-accept-invite.md"
+    },
+    {
+      "id": "T12",
+      "title": "Implement SignIn use case with lockout",
+      "layer": "app",
+      "deps": [
+        "T8"
+      ],
+      "acs": [
+        "AC-07",
+        "AC-08"
+      ],
+      "dod": "App tests: active staff session; generic auth.denied; lockout after 5 failures for 15 minutes.",
+      "files_hint": [
+        "apps/api/src/modules/users/app/"
+      ],
+      "file": "docs/features/school-auth/tasks/app-sign-in.md"
+    },
+    {
+      "id": "T13",
+      "title": "Implement roster, revoke, and tenancy checks",
+      "layer": "app",
+      "deps": [
+        "T7",
+        "T8"
+      ],
+      "acs": [
+        "AC-09",
+        "AC-10",
+        "AC-11"
+      ],
+      "dod": "App tests: revoke inactivates teacher and sessions; Teacher forbidden on invite/revoke; cross-school access denied with no foreign data.",
+      "files_hint": [
+        "apps/api/src/modules/users/app/",
+        "apps/api/src/modules/schools/app/"
+      ],
+      "file": "docs/features/school-auth/tasks/app-roster-revoke.md"
+    },
+    {
+      "id": "T14",
+      "title": "Expose register, sign-in, and accept-invite HTTP ports",
+      "layer": "ports",
+      "deps": [
+        "T9",
+        "T11",
+        "T12"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-02b",
+        "AC-05",
+        "AC-06",
+        "AC-06b",
+        "AC-07",
+        "AC-08",
+        "AC-12"
+      ],
+      "dod": "HTTP smoke/contract tests: registerSchool/signIn/acceptInvite status codes and error codes match OpenAPI; Set-Cookie on success.",
+      "files_hint": [
+        "apps/api/src/modules/schools/ports/",
+        "apps/api/src/modules/users/ports/",
+        "packages/shared/"
+      ],
+      "file": "docs/features/school-auth/tasks/ports-public-auth.md"
+    },
+    {
+      "id": "T15",
+      "title": "Expose invite, reissue, roster, and revoke HTTP ports",
+      "layer": "ports",
+      "deps": [
+        "T10",
+        "T13"
+      ],
+      "acs": [
+        "AC-03",
+        "AC-04",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-13"
+      ],
+      "dod": "HTTP tests: CookieAuth required; School Admin succeeds; Teacher gets staff.forbidden; cross-school school.forbidden.",
+      "files_hint": [
+        "apps/api/src/modules/users/ports/",
+        "apps/api/src/modules/schools/ports/",
+        "packages/shared/"
+      ],
+      "file": "docs/features/school-auth/tasks/ports-school-staff.md"
+    },
+    {
+      "id": "T16",
+      "title": "Compose DI, session cookie middleware, and route registration",
+      "layer": "wiring",
+      "deps": [
+        "T14",
+        "T15"
+      ],
+      "acs": [
+        "AC-07",
+        "AC-09",
+        "AC-11"
+      ],
+      "dod": "Booted API resolves session from HTTP-only cookie; revoked session rejected on next request; modules wired without circular imports.",
+      "files_hint": [
+        "apps/api/src/app.ts",
+        "apps/api/src/server.ts",
+        "apps/api/src/modules/"
+      ],
+      "file": "docs/features/school-auth/tasks/wiring-api-composition.md"
+    },
+    {
+      "id": "T17",
+      "title": "Build public register, sign-in, and accept-invite screens",
+      "layer": "ui",
+      "deps": [
+        "T16"
+      ],
+      "acs": [
+        "AC-01",
+        "AC-02",
+        "AC-02b",
+        "AC-05",
+        "AC-06",
+        "AC-06b",
+        "AC-07",
+        "AC-08",
+        "AC-12"
+      ],
+      "dod": "SCR-01/02/03 states (default/loading/validation/error/success redirects) work against API; hybrid server actions set cookies.",
+      "files_hint": [
+        "apps/web/app/(public)/",
+        "apps/web/components/"
+      ],
+      "file": "docs/features/school-auth/tasks/ui-public-auth.md"
+    },
+    {
+      "id": "T18",
+      "title": "Build school administration staff roster screen",
+      "layer": "ui",
+      "deps": [
+        "T16"
+      ],
+      "acs": [
+        "AC-03",
+        "AC-04",
+        "AC-09",
+        "AC-10",
+        "AC-11",
+        "AC-13"
+      ],
+      "dod": "SCR-04 states: roster load, empty, invite/reissue/revoke success, forbidden errors \u2014 School Admin only.",
+      "files_hint": [
+        "apps/web/app/(authenticated)/school-admin/",
+        "apps/web/components/"
+      ],
+      "file": "docs/features/school-auth/tasks/ui-admin-roster.md"
+    },
+    {
+      "id": "T19",
+      "title": "Build teacher workspace shell placeholder",
+      "layer": "ui",
+      "deps": [
+        "T16"
+      ],
+      "acs": [
+        "AC-05",
+        "AC-07",
+        "AC-09"
+      ],
+      "dod": "SCR-05 default/loading/error (revoked session) shell; Teachers land here after accept/sign-in.",
+      "files_hint": [
+        "apps/web/app/(authenticated)/teacher/"
+      ],
+      "file": "docs/features/school-auth/tasks/ui-teacher-shell.md"
+    }
+  ]
+}
