@@ -1,0 +1,12 @@
+:root {
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+  --spacing-page: 1rem;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+  background: var(--color-background);
+  color: var(--color-foreground);
+}

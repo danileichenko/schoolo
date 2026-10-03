@@ -1,0 +1,11 @@
+{
+  "expo": {
+    "name": "schoolo",
+    "slug": "schoolo",
+    "version": "1.0.0",
+    "scheme": "schoolo",
+    "orientation": "portrait",
+    "platforms": ["ios", "android"],
+    "plugins": ["expo-router"]
+  }
+}

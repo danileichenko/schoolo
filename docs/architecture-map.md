@@ -1,8 +1,8 @@
 ---
-status: foundation
-mode: greenfield-bootstrap
-updated_at: 2026-10-02
-reflects_commit: d00facc
+status: current
+mode: current
+updated_at: 2026-10-03
+reflects_commit: pending
 language: "typescript 5.x (Node.js 22)"
 build_cmd: "pnpm build"
 test_cmd: "pnpm test"
@@ -13,8 +13,8 @@ frontend: "next.js 15 + expo (react native)"
 
 # Architecture map — schoolo
 
-> **Target foundation** for a greenfield repo (`mode: greenfield-bootstrap`). Describes what
-> `scaffold` will materialize. After scaffold, refresh `reflects_commit` if the layout drifts.
+> **Current** architecture after scaffold. Refresh with `survey` when the repo drifts past
+> `reflects_commit`.
 > Hand-maintained `docs/architecture.md`, if added later, is reconciled here — not replaced.
 
 ## Stack
@@ -51,10 +51,10 @@ C4Container
 
 | Module | Path | Layers | Wired at | Responsibility |
 |---|---|---|---|---|
-| api | `apps/api` | domain → app → infra → ports per bounded context | `apps/api/src/server.ts` (scaffold) | HTTP API, auth, school tenancy, journal domains |
-| web | `apps/web` | ui → app (server actions / client) | `apps/web/app/layout.tsx` (scaffold) | Teacher and admin web write path |
-| mobile | `apps/mobile` | ui → app | `apps/mobile/app/_layout.tsx` (scaffold) | Student mobile read and lightweight write |
-| shared | `packages/shared` | schemas + shared types | `packages/shared/src/index.ts` (scaffold) | Zod contracts shared by api, web, mobile |
+| api | `apps/api` | domain → app → infra → ports per bounded context | `apps/api/src/server.ts:1` | HTTP API, auth, school tenancy, journal domains |
+| web | `apps/web` | ui → app (server actions / client) | `apps/web/app/layout.tsx:1` | Teacher and admin web write path |
+| mobile | `apps/mobile` | ui → app | `apps/mobile/app/_layout.tsx:1` | Student mobile read and lightweight write |
+| shared | `packages/shared` | schemas + shared types | `packages/shared/src/index.ts:1` | Zod contracts shared by api, web, mobile |
 
 Bounded contexts inside `apps/api` (folders under `apps/api/src/modules/`): `schools`, `users`, `schedule`, `homework`, `grades`, `feedback`, `messages` — each follows the hexagonal slice in ADR 0002.
 
@@ -92,7 +92,7 @@ Bounded contexts inside `apps/api` (folders under `apps/api/src/modules/`): `sch
 
 ## Constraints & known tech-debt
 
-- **Greenfield — skeleton not materialized yet** — run `/sdd:scaffold` before feature implementation; machine keys assume pnpm scripts exist after scaffold.
+- **Journal domains are placeholders** — module folders exist under `apps/api/src/modules/`; business logic ships per roadmap steps.
 - **Single-region v1** — no multi-region or offline-first mobile in the foundation.
 - **AI assistant** — not part of the scaffold; added as a later module consuming read-only aggregates from existing domains (per product brief).
 

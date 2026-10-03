@@ -1,2 +1,11 @@
 .claude/*.local.md
 .worktrees/
+node_modules/
+.env
+dist/
+.next/
+.turbo/
+.expo/
+*.log
+.DS_Store
+*.tsbuildinfo
